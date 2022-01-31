@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+<head>
+	
+	<title>COVID:Suivez La Situation Sanitaire</title>
+	
+	<link rel="shortcut icon" type="image/x-icon" href="docs/images/favicon.ico" />
+	<link rel="stylesheet" href="slider.css" />
+	<link rel="stylesheet" href="leaflet.css" />
+	<script src="leaflet.js"></script>
+
+
+	<style>
+		#map {
+			width: 700px;
+			height: 400px;
+		}
+	
+	</style>
+
+</head>
+<body>
+	<div>
+	<div class="slidecontainer">
+		<input type="range" min="28" max="34" value="28" class="slider" id="myRange" onchange="changeStyle()"  >
+		<span id="demo" class="slider-time">Value: </span>
+		 <div id='map'></div>
+		
+	</div>
+			
+		</div>
+
+<script type="text/javascript" src="Region_FM.js"></script>
+
+<script type="text/javascript">
+
+
+/* slider code
+
+var slider = document.getElementById("myRange");
+var output = document.getElementById("demo");
+output.innerHTML = slider.value; // Display the default slider value
+
+// Update the current slider value (each time you drag the slider handle)
+slider.oninput = function() {
+  output.innerHTML = this.value;
+}
+*/
+var slider = document.getElementById("myRange");
+var output = document.getElementById("demo");
+output.innerHTML = slider.value;
+
+slider.oninput = function() {
+  output.innerHTML = this.value;
+}
+    
+	var map = L.map('map').setView([34, -4.8], 7);
+
+
+	L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+	    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+	}).addTo(map);
+
+	var date=28;
+
+
+function changeStyle(){
+	
+var date=slider.value;
+geojson.eachLayer(function (layer){
+
+layer.setPopupContent( '<p>La Province de ' +
+				layer.feature.properties.NAME + " enregistre " + layer.feature.properties.CAS[dateToIndex(date)] + "  cas </p>" +"le " +date+ " Décembre")
+
+				layer.setStyle(getStyle(layer.feature));
+
+})
+
+	function getStyle(feature){
+		console.log(date,"the date")
+		return {
+			
+			weight: 2,
+			opacity: 1,
+			color: 'white',
+			dashArray: '3',
+			fillOpacity: 0.7,
+			fillColor: getColor(feature.properties.CAS[dateToIndex(date)])
+		};
+		
+	}
+	
+}
+
+	function getColor(attribut) {
+		return attribut > 500 ? '#bd0026' :
+			   attribut > 200 ? '#f03b20' :
+			   attribut > 100 ? '#fd8d3c' :
+			   attribut > 50 ? '#feb24c' :
+			   attribut > 20 ? '#fed976' :
+ 		
+							'#ffffb2';
+	}
+/*
+	function changeColors(){
+		geojson.eachLayer(function (layer) {  
+  
+    layer.setStyle({fillColor: getColor(layer.properties.CASES[dateToIndex(slider.value)] ) }  )
+  })}
+*/
+
+function dateToIndex(n){
+	return n%28;
+}
+
+	function stylisermonFeature(feature) {
+
+console.log(date);
+
+		return {
+			weight: 2,
+			opacity: 1,
+			color: 'white',
+			dashArray: '3',
+			fillOpacity: 0.7,
+			fillColor: getColor(feature.properties.CAS[dateToIndex(date)])
+		};
+	}
+	function highlightFeature(e) {
+		var layer = e.target;
+
+		layer.setStyle({
+			weight: 5,
+			color: '#666',
+			dashArray: '',
+			fillOpacity: 0.7
+		});
+
+		if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
+			layer.bringToFront();
+		}
+
+		info.update(layer.feature.properties);
+	}
+	function onEachFeature(feature, layer) {
+		var popupContent = '<p>Province de ' +
+				feature.properties.NAME + " enregistre " + feature.properties.CAS[dateToIndex(slider.value)] + "  cas </p>" +"le " +date+ " Décembre";
+
+		if (feature.properties && feature.properties.popupContent) {
+			popupContent += feature.properties.popupContent;
+		}
+		layer.bindPopup(popupContent);		
+	}
+
+	var geojson = L.geoJson(data, {
+		style: stylisermonFeature,
+	onEachFeature: onEachFeature,
+
+	}).addTo(map);
+	var legend = L.control({position: 'bottomright'});
+
+		legend.onAdd = function (map) {
+
+    var div = L.DomUtil.create('div', 'info legend'),
+        grades = [0, 20, 50, 100, 200, 500],
+        labels = [];
+
+    // loop through our density intervals and generate a label with a colored square for each interval
+    for (var i = 0; i < grades.length; i++) {
+        div.innerHTML +=
+            '<i style="background:' + getColor(grades[i] + 1) + '"></i> ' +
+            grades[i] + (grades[i + 1] ? '&ndash;' + grades[i + 1] + '<br>' : '+');
+    }
+
+    return div;
+};
+legend.addTo(map);
+</script>
+
+</body>
+</html>
